@@ -4,7 +4,7 @@ import { Button, TextField, Typography } from "@material-ui/core";
 import Select from "react-select";
 import ProvinceList from "../utils/ProvinceList";
 
-interface IState {
+export interface IState {
   food: string;
   time: string;
   streetaddress: string;
@@ -103,7 +103,7 @@ export default function DuckSubmit() {
             defaultInputValue="Province"
             options={ProvinceList}
             onChange={(e) =>
-              dispatch({ type: "updateProvince", payload: e.value })
+              dispatch({ type: "updateProvince", payload: e?.value })
             }
           />
         </div>
