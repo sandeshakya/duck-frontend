@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button, TextField, Typography } from "@material-ui/core";
 import Select from "react-select";
@@ -48,6 +48,7 @@ const duckReducer = (state: IState, action: IAction): IState => {
 
 export default function DuckSubmit() {
   const classes = useStyles();
+  const [errors, setErrors] = useState<string[]>([]);
   const [state, dispatch] = useReducer(duckReducer, {
     food: "",
     time: "",
@@ -59,7 +60,16 @@ export default function DuckSubmit() {
   });
 
   function HandleSubmit() {
-    console.log(state);
+    const submitErrors: string[] = [];
+    for (const [k, v] of Object.entries(state)) {
+      if (v === "" || v === "0") {
+        submitErrors.push(`${k} is invalid`);
+      }
+    }
+    setErrors(submitErrors);
+    if (!submitErrors.length) {
+      console.log(state);
+    }
   }
 
   return (
@@ -100,7 +110,6 @@ export default function DuckSubmit() {
         <br />
         <div style={{ marginTop: 8 }}>
           <Select
-            defaultInputValue="Province"
             options={ProvinceList}
             onChange={(e) =>
               dispatch({ type: "updateProvince", payload: e?.value })
@@ -109,26 +118,34 @@ export default function DuckSubmit() {
         </div>
         <br />
         <TextField
-          label="Number of ducks fed"
+          label="How many ducks"
           value={state.numberOfDucks}
           onChange={(e) =>
             dispatch({ type: "updateNumberOfDucks", payload: e.target.value })
           }
           type="number"
+          InputProps={{ inputProps: { min: 0 } }}
         />
         <br />
         <TextField
-          label="How much food was fed"
+          label="How much food (pieces)"
           value={state.foodQuantity}
           onChange={(e) =>
             dispatch({ type: "updateFoodQuantity", payload: e.target.value })
           }
           type="number"
+          InputProps={{ inputProps: { min: 0 } }}
         />
         <br />
         <Button variant="contained" color="primary" onClick={HandleSubmit}>
           Submit
         </Button>
+        {Boolean(errors.length) &&
+          errors.map((e, idx) => (
+            <div key={idx} className={classes.error}>
+              {e}
+            </div>
+          ))}
       </div>
     </div>
   );
@@ -145,5 +162,8 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     width: "100%",
     maxWidth: "540px",
+  },
+  error: {
+    color: "red",
   },
 }));
