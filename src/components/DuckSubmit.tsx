@@ -3,6 +3,13 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Button, TextField, Typography } from "@material-ui/core";
 import Select from "react-select";
 import ProvinceList from "../utils/ProvinceList";
+import { useMutation } from "@apollo/client";
+import { INSERT_DUCK_DATA } from "../graphql/duck";
+import {
+  InsertDuckDataMutation,
+  InsertDuckDataMutationVariables,
+} from "../generated/graphql";
+import { useHistory } from "react-router-dom";
 
 export interface IState {
   food: string;
@@ -58,8 +65,14 @@ export default function DuckSubmit() {
     numberOfDucks: 0,
     foodQuantity: 0,
   });
+  const history = useHistory();
 
-  function HandleSubmit() {
+  const [addDuck] = useMutation<
+    InsertDuckDataMutation,
+    InsertDuckDataMutationVariables
+  >(INSERT_DUCK_DATA);
+
+  async function HandleSubmit() {
     const submitErrors: string[] = [];
     for (const [k, v] of Object.entries(state)) {
       if (v === "" || v === "0") {
@@ -69,6 +82,15 @@ export default function DuckSubmit() {
     setErrors(submitErrors);
     if (!submitErrors.length) {
       console.log(state);
+      await addDuck({
+        variables: {
+          obj: {
+            ...state,
+          },
+        },
+        refetchQueries: ["getDuckData"],
+      });
+      history.push("/");
     }
   }
 
