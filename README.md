@@ -2,6 +2,8 @@
 
 Frontend for submitting when users fed ducks and view records in a table.
 
+Allows users to input data about feeding ducks in a form, and view the submissions in a table.
+
 Technologies used:
 
 - ReactJS
