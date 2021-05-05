@@ -1,7 +1,12 @@
-import React, { useReducer, useState } from "react";
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Button, TextField, Typography } from "@material-ui/core";
-import Select from "react-select";
+import {
+  Button,
+  TextField,
+  Typography,
+  Select,
+  MenuItem,
+} from "@material-ui/core";
 import ProvinceList from "../utils/ProvinceList";
 import { useMutation } from "@apollo/client";
 import { INSERT_DUCK_DATA } from "../graphql/duck";
@@ -10,6 +15,8 @@ import {
   InsertDuckDataMutationVariables,
 } from "../generated/graphql";
 import { useHistory } from "react-router-dom";
+import { useFormik } from "formik";
+import * as yup from "yup";
 
 export interface IState {
   food: string;
@@ -20,51 +27,9 @@ export interface IState {
   numberOfDucks: number;
   foodQuantity: number;
 }
-interface IAction {
-  type:
-    | "updateFood"
-    | "updateTime"
-    | "updateStreetAddress"
-    | "updateCity"
-    | "updateProvince"
-    | "updateNumberOfDucks"
-    | "updateFoodQuantity";
-  payload: any;
-}
-
-const duckReducer = (state: IState, action: IAction): IState => {
-  switch (action.type) {
-    case "updateFood":
-      return { ...state, food: action.payload };
-    case "updateTime":
-      return { ...state, time: action.payload };
-    case "updateStreetAddress":
-      return { ...state, streetaddress: action.payload };
-    case "updateCity":
-      return { ...state, city: action.payload };
-    case "updateProvince":
-      return { ...state, province: action.payload };
-    case "updateNumberOfDucks":
-      return { ...state, numberOfDucks: action.payload };
-    case "updateFoodQuantity":
-      return { ...state, foodQuantity: action.payload };
-    default:
-      return state;
-  }
-};
 
 export default function DuckSubmit() {
   const classes = useStyles();
-  const [errors, setErrors] = useState<string[]>([]);
-  const [state, dispatch] = useReducer(duckReducer, {
-    food: "",
-    time: "",
-    streetaddress: "",
-    city: "",
-    province: "",
-    numberOfDucks: 0,
-    foodQuantity: 0,
-  });
   const history = useHistory();
 
   const [addDuck] = useMutation<
@@ -72,103 +37,139 @@ export default function DuckSubmit() {
     InsertDuckDataMutationVariables
   >(INSERT_DUCK_DATA);
 
-  async function HandleSubmit() {
-    const submitErrors: string[] = [];
-    for (const [k, v] of Object.entries(state)) {
-      if (v === "" || v === "0") {
-        submitErrors.push(`${k} is invalid`);
-      }
-    }
-    setErrors(submitErrors);
-    if (!submitErrors.length) {
-      console.log(state);
-      await addDuck({
-        variables: {
-          obj: {
-            ...state,
+  const validationSchema = yup.object({
+    food: yup.string().required("Food name is required"),
+    time: yup.string().required("A time is required"),
+    streetaddress: yup.string().required("A Street Address is required"),
+    city: yup.string().required("A City is required"),
+    province: yup.string().required("A Province is required"),
+    numberOfDucks: yup.number().required("Invalid number of ducks").min(1),
+    foodQuantity: yup
+      .number()
+      .required("Invalid number of food quantity")
+      .min(1),
+  });
+  const formik = useFormik({
+    initialValues: {
+      food: "",
+      time: "",
+      streetaddress: "",
+      city: "",
+      province: "SK",
+      numberOfDucks: 0,
+      foodQuantity: 0,
+    },
+    validationSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      console.log(values);
+      try {
+        await addDuck({
+          variables: {
+            obj: { ...values, time: new Date(values.time).toISOString() },
           },
-        },
-        refetchQueries: ["getDuckData"],
-      });
-      history.push("/");
-    }
-  }
+          refetchQueries: ["getDuckData"],
+        });
+        history.push("/");
+      } catch (e) {
+        console.error(e);
+      }
+      setSubmitting(false);
+    },
+  });
 
   return (
     <div className={classes.container}>
       <Typography variant="h3">Duck Feeding Form</Typography>
-      <div className={classes.form}>
+      <form onSubmit={formik.handleSubmit} className={classes.form}>
         <TextField
-          label="Food"
-          value={state.food}
-          onChange={(e) =>
-            dispatch({ type: "updateFood", payload: e.target.value })
-          }
+          name="food"
+          label="What did you feed the ducks?"
+          value={formik.values.food}
+          error={formik.touched.food && Boolean(formik.errors.food)}
+          helperText={formik.touched.food && formik.errors.food}
+          onChange={formik.handleChange}
         />
-        <br />
         <TextField
-          label="Time"
-          value={state.time}
-          onChange={(e) =>
-            dispatch({ type: "updateTime", payload: e.target.value })
-          }
+          name="time"
+          type="datetime-local"
+          label="When did you feed them?"
+          value={formik.values.time}
+          error={formik.touched.time && Boolean(formik.errors.time)}
+          helperText={formik.touched.time && formik.errors.time}
+          onChange={formik.handleChange}
+          InputLabelProps={{
+            shrink: true,
+          }}
         />
-        <br />
         <TextField
+          name="streetaddress"
           label="Street Address"
-          value={state.streetaddress}
-          onChange={(e) =>
-            dispatch({ type: "updateStreetAddress", payload: e.target.value })
+          value={formik.values.streetaddress}
+          error={
+            formik.touched.streetaddress && Boolean(formik.errors.streetaddress)
           }
+          helperText={
+            formik.touched.streetaddress && formik.errors.streetaddress
+          }
+          onChange={formik.handleChange}
         />
-        <br />
         <TextField
+          name="city"
           label="City"
-          value={state.city}
-          onChange={(e) =>
-            dispatch({ type: "updateCity", payload: e.target.value })
-          }
+          value={formik.values.city}
+          error={formik.touched.city && Boolean(formik.errors.city)}
+          helperText={formik.touched.city && formik.errors.city}
+          onChange={formik.handleChange}
         />
-        <br />
-        <div style={{ marginTop: 8 }}>
-          <Select
-            options={ProvinceList}
-            onChange={(e) =>
-              dispatch({ type: "updateProvince", payload: e?.value })
-            }
-          />
-        </div>
-        <br />
+        <Typography variant="caption">Province</Typography>
+        <Select
+          name="province"
+          onChange={formik.handleChange}
+          label="Province"
+          defaultValue="SK"
+        >
+          {ProvinceList.map((p, idx) => (
+            <MenuItem key={idx} value={p.value}>
+              {p.label}
+            </MenuItem>
+          ))}
+        </Select>
         <TextField
-          label="How many ducks"
-          value={state.numberOfDucks}
-          onChange={(e) =>
-            dispatch({ type: "updateNumberOfDucks", payload: e.target.value })
-          }
+          name="numberOfDucks"
+          label="How many Ducks did you feed?"
+          value={formik.values.numberOfDucks}
           type="number"
           InputProps={{ inputProps: { min: 0 } }}
-        />
-        <br />
-        <TextField
-          label="How much food (pieces)"
-          value={state.foodQuantity}
-          onChange={(e) =>
-            dispatch({ type: "updateFoodQuantity", payload: e.target.value })
+          error={
+            formik.touched.numberOfDucks && Boolean(formik.errors.numberOfDucks)
           }
+          helperText={
+            formik.touched.numberOfDucks && formik.errors.numberOfDucks
+          }
+          onChange={formik.handleChange}
+        />
+        <TextField
+          name="foodQuantity"
+          label="How much did you feed the ducks? (pieces)"
+          value={formik.values.foodQuantity}
           type="number"
+          error={
+            formik.touched.foodQuantity && Boolean(formik.errors.foodQuantity)
+          }
+          helperText={formik.touched.foodQuantity && formik.errors.foodQuantity}
+          onChange={formik.handleChange}
           InputProps={{ inputProps: { min: 0 } }}
         />
-        <br />
-        <Button variant="contained" color="primary" onClick={HandleSubmit}>
+        <Button
+          color="primary"
+          variant="contained"
+          type="submit"
+          disabled={formik.isSubmitting}
+          style={{ marginTop: "8px" }}
+        >
           Submit
         </Button>
-        {Boolean(errors.length) &&
-          errors.map((e, idx) => (
-            <div key={idx} className={classes.error}>
-              {e}
-            </div>
-          ))}
-      </div>
+      </form>
     </div>
   );
 }
@@ -184,8 +185,5 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     width: "100%",
     maxWidth: "540px",
-  },
-  error: {
-    color: "red",
   },
 }));

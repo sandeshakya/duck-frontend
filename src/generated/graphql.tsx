@@ -12,8 +12,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  date: any;
   numeric: any;
+  timestamptz: any;
   uuid: any;
 };
 
@@ -36,20 +36,6 @@ export type String_Comparison_Exp = {
   _similar?: Maybe<Scalars['String']>;
 };
 
-
-/** expression to compare columns of type date. All fields are combined with logical 'AND'. */
-export type Date_Comparison_Exp = {
-  _eq?: Maybe<Scalars['date']>;
-  _gt?: Maybe<Scalars['date']>;
-  _gte?: Maybe<Scalars['date']>;
-  _in?: Maybe<Array<Scalars['date']>>;
-  _is_null?: Maybe<Scalars['Boolean']>;
-  _lt?: Maybe<Scalars['date']>;
-  _lte?: Maybe<Scalars['date']>;
-  _neq?: Maybe<Scalars['date']>;
-  _nin?: Maybe<Array<Scalars['date']>>;
-};
-
 /** columns and relationships of "duck" */
 export type Duck = {
   __typename?: 'duck';
@@ -60,7 +46,7 @@ export type Duck = {
   numberOfDucks: Scalars['numeric'];
   province: Scalars['String'];
   streetaddress: Scalars['String'];
-  time: Scalars['date'];
+  time: Scalars['timestamptz'];
 };
 
 /** aggregated selection of "duck" */
@@ -139,7 +125,7 @@ export type Duck_Bool_Exp = {
   numberOfDucks?: Maybe<Numeric_Comparison_Exp>;
   province?: Maybe<String_Comparison_Exp>;
   streetaddress?: Maybe<String_Comparison_Exp>;
-  time?: Maybe<Date_Comparison_Exp>;
+  time?: Maybe<Timestamptz_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "duck" */
@@ -163,7 +149,7 @@ export type Duck_Insert_Input = {
   numberOfDucks?: Maybe<Scalars['numeric']>;
   province?: Maybe<Scalars['String']>;
   streetaddress?: Maybe<Scalars['String']>;
-  time?: Maybe<Scalars['date']>;
+  time?: Maybe<Scalars['timestamptz']>;
 };
 
 /** aggregate max on columns */
@@ -176,7 +162,7 @@ export type Duck_Max_Fields = {
   numberOfDucks?: Maybe<Scalars['numeric']>;
   province?: Maybe<Scalars['String']>;
   streetaddress?: Maybe<Scalars['String']>;
-  time?: Maybe<Scalars['date']>;
+  time?: Maybe<Scalars['timestamptz']>;
 };
 
 /** order by max() on columns of table "duck" */
@@ -201,7 +187,7 @@ export type Duck_Min_Fields = {
   numberOfDucks?: Maybe<Scalars['numeric']>;
   province?: Maybe<Scalars['String']>;
   streetaddress?: Maybe<Scalars['String']>;
-  time?: Maybe<Scalars['date']>;
+  time?: Maybe<Scalars['timestamptz']>;
 };
 
 /** order by min() on columns of table "duck" */
@@ -284,7 +270,7 @@ export type Duck_Set_Input = {
   numberOfDucks?: Maybe<Scalars['numeric']>;
   province?: Maybe<Scalars['String']>;
   streetaddress?: Maybe<Scalars['String']>;
-  time?: Maybe<Scalars['date']>;
+  time?: Maybe<Scalars['timestamptz']>;
 };
 
 /** aggregate stddev on columns */
@@ -559,6 +545,20 @@ export type Subscription_RootDuck_AggregateArgs = {
 /** subscription root */
 export type Subscription_RootDuck_By_PkArgs = {
   id: Scalars['uuid'];
+};
+
+
+/** expression to compare columns of type timestamptz. All fields are combined with logical 'AND'. */
+export type Timestamptz_Comparison_Exp = {
+  _eq?: Maybe<Scalars['timestamptz']>;
+  _gt?: Maybe<Scalars['timestamptz']>;
+  _gte?: Maybe<Scalars['timestamptz']>;
+  _in?: Maybe<Array<Scalars['timestamptz']>>;
+  _is_null?: Maybe<Scalars['Boolean']>;
+  _lt?: Maybe<Scalars['timestamptz']>;
+  _lte?: Maybe<Scalars['timestamptz']>;
+  _neq?: Maybe<Scalars['timestamptz']>;
+  _nin?: Maybe<Array<Scalars['timestamptz']>>;
 };
 
 

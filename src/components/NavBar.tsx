@@ -26,7 +26,7 @@ export default function NavBar() {
             <HomeIcon />
           </IconButton>
           <div style={{ flex: 1, display: "flex" }}>
-            <Typography variant="h3">Feed The Ducks</Typography>
+            <Typography variant="h3">Feeding Ducks</Typography>
           </div>
           <Button color="inherit" onClick={() => history.push("/submissions")}>
             View Submissions
